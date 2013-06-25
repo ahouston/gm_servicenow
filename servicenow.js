@@ -12,6 +12,7 @@
 // @include    https://didataservices.service-now.com/nav.do*
 // @include    https://didataservices.service-now.com/incident.do*
 // @updateURL  https://raw.github.com/ahouston/gm_servicenow/master/metadata
+// @downloadURL https://raw.github.com/ahouston/gm_servicenow/master/servicenow.js
 // @copyright  2013, Allan Houston
 // ==/UserScript==
 

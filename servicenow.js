@@ -1,19 +1,19 @@
 // ==UserScript==
 // @name       ServiceNow Autocomplete
-// @namespace  http://pluto/
-// @version    1.5
+// @namespace  https://github.com/ahouston/gm_servicenow
+// @version    1.6
 // @require    file://C:/GreaseMonkey/jquery.min.js
 // @require    file://C:/GreaseMonkey/jquery.simulate.js
 // @require    file://C:/GreaseMonkey/jquery-ui.js
-// @require	   file://C:/GreaseMonkey/splitbutton.js
+// @require    file://C:/GreaseMonkey/splitbutton.js
 // @resource   customCSS file://C:/GreaseMonkey/jquery-ui-1.10.3.custom.css
 // @description ServiceNow Actions
 // @include    *didataservices.service-now.com*
 // @include    https://didataservices.service-now.com/nav.do*
 // @include    https://didataservices.service-now.com/incident.do*
+// @updateURL  https://raw.github.com/ahouston/gm_servicenow/master/metadata
 // @copyright  2013, Allan Houston
 // ==/UserScript==
-
 
 /*   ----------------
  * | Change History  |

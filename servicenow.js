@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       ServiceNow Autocomplete
 // @namespace  https://github.com/ahouston/gm_servicenow
-// @version    1.6
+// @version    1.6.1
 // @require    file://C:/GreaseMonkey/jquery.min.js
 // @require    file://C:/GreaseMonkey/jquery.simulate.js
 // @require    file://C:/GreaseMonkey/jquery-ui.js
@@ -20,6 +20,10 @@
  * | Change History  |
  *   ----------------
  *
+ *  v1.6.1 CHANGE: Testing auto-updates
+ *
+ *  v1.6   ADD: Moved to GitHub for updates
+ * 
  *  v1.5   ADD: Script will now prompt and store your ServiceNow username for future use
  *  v1.5   ADD: You can change your username from the GreaseMonkey / Tampermonkey icon
  *

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       ServiceNow Autocomplete
 // @namespace  https://github.com/ahouston/gm_servicenow
-// @version    1.6.1
+// @version    1.6.2
 // @require    file://C:/GreaseMonkey/jquery.min.js
 // @require    file://C:/GreaseMonkey/jquery.simulate.js
 // @require    file://C:/GreaseMonkey/jquery-ui.js
@@ -19,6 +19,8 @@
 /*   ----------------
  * | Change History  |
  *   ----------------
+ *  v1.6.2 FIX: #AC.xxx.xxx DIVs and iFrames not being correctly hidden due to race condition in ac.setWidth(); 
+ *		Cleaned up in the simMenu() function
  *
  *  v1.6.1 CHANGE: Testing auto-updates
  *
@@ -27,23 +29,25 @@
  *  v1.5   ADD: Script will now prompt and store your ServiceNow username for future use
  *  v1.5   ADD: You can change your username from the GreaseMonkey / Tampermonkey icon
  *
- *  v1.4.2 FIX: Power regular expressions not specific enough
- *  v1.4.1 ADD: Configuration change script for Bruce
+ *  v1.4.2 FIX:  Power regular expressions not specific enough
+ *  v1.4.1 ADD:  Configuration change script for Bruce
  *  v1.4.1 FORK: Forked into Local Javascript and Remote Javascript versions
  * 
- *  v1.4: ADD: Create control ticket automatically
- *  v1.4: ADD: New simMenu functionality - now changes values using ServiceNows Javascript functions, much faster!
- *  v1.4: ADD: Chainable waitForCSS and waitForValue functions to wait for either a field's CSS or value to change (like the green bars on AJAX calls)
+ *  v1.4: ADD: 	Create control ticket automatically
+ *  v1.4: ADD: 	New simMenu functionality - now changes values using ServiceNows Javascript functions, much faster!
+ *  v1.4: ADD: 	Chainable waitForCSS and waitForValue functions to wait for either a field's CSS or value to i
+ *		change (like the green bars on AJAX calls)
  *  
  *  v1.3: ADD: MAJOR rework, added support for SVRs as well as ICMs
  *  v1.3: ADD: Added Workload quick adds - will carry the Short Description into the window and add the correct hours
- * 	v1.3: ADD: Added sections to drop down menu
+ *  v1.3: ADD: Added sections to drop down menu
  *
  *  v1.2: ADD: Automatically chooses "Close or cancel task" or "Set to closed" depending on the current status
  *  v1.2: FIX: Root cause "Configuration" regex not specific enough and matching multiple values. Tightened up.
- *  v1.2: ADD: "Close: Fibre Break - Line is stable" - for calls where we're cleaning up after a fibre break and shutting individual tickets down.
+ *  v1.2: ADD: "Close: Fibre Break - Line is stable" - for calls where we're cleaning up after a fibre break and 
+ * 		shutting individual tickets down.
  * 
- * 	v1.1: FIX: Forced a trigger of "onchange" on the Closure and Root Cause textboxes so that values persist during save or update
+ *  v1.1: FIX: Forced a trigger of "onchange" on the Closure and Root Cause textboxes so that values persist during save or update
  *  v1.1: ADD: "Close: No Response from Provider" and the three MACD closure processes.
  * 
  *  v1.0: Initial release
@@ -707,7 +711,8 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
 
             
         } 
-		                
+		  
+		
 	});
     
     $('a.workload').click(function() {
@@ -755,6 +760,17 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/task_time_wo
  *  Functions 
  *  --------- 
  */
+ 
+ 
+function cleanDivs() {
+
+
+        // Attempt to hide all #AC. divs and iFrames
+            
+        $('div[id^="AC"]').each(function() { $(this).css('display','none'); });
+        $('iframe[id^="AC"]').each(function() { $(this).css('display','none'); });
+           
+}
     
 function waitForCss(selector,attribute,value,call_back,poll_time,max_time) {
 
@@ -924,6 +940,13 @@ function simMenu(field,regex) {
             //console.log("Hiding " + divID);  $(""+divID+"").css('display','none');
             
             if (matchFound == 0) { console.warn("Error matching regular expression" + regex); }
+            
+            // Attempt to hide all #AC. divs and iFrames
+            
+            cleanDivs();
+            
+            //$('div[id^="AC"]').each(function() { $(this).css('display','none'); });
+            //$('iframe[id^="AC"]').each(function() { $(this).css('display','none'); });
             
 		};
     }
@@ -1104,4 +1127,3 @@ var keysim =  {
 		RIGHT: 2
 	}
 };
-

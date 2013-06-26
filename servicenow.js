@@ -99,30 +99,30 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
     		'<button id="rerun">Actions</button> ' +
     		'<button id="select">Select an action</button> ' +
   		'</div> ' +
-  			'<ul> ' +
-  				' <li><a id="no_fault_found" href="#">Close: No Fault Found</a></li> ' +
-        		' <li><a id="no_response" href="#">Close: No Response from Provider</a></li> ' +
-        		' <li><a id="bandwidth_utilisation" href="#">Close: Bandwidth Over Utilised</a></li> ' +
-        		' <li><a href="#"><hr></a></li> ' +
-        		' <li><a id="fibre_break_generic" href="#">Close: Fibre Break - Generic</a></li> ' +
-        		' <li><a id="fibre_break_stable" href="#">Close: Fibre Break - Line is stable</a></li> ' +
-                ' <li><a href="#"><hr></a></li> ' +
-				' <li><a id="circuit_config_generic" href="#">Close: Circuit - Generic Configuration</a></li> ' +
-        		' <li><a href="#"><hr></a></li> ' +
-        		' <li><a id="power_failure_generic" href="#">Close: Power Failure - General </a></li> ' +
-        		' <li><a id="power_failure_ups" href="#">Close: Power Failure - UPS Exhausted</a></li> ' +
-                ' <li><a href="#"><hr></a></li> ' +
-        		' <li><a id="macd_bandwidth" href="#">Close: MACD - Bandwidth Change</a></li> ' +
-        		' <li><a id="macd_relocation" href="#">Close: MACD - Circuit Relocation</a></li> ' +
-        		' <li><a id="macd_cancellation" href="#">Close: MACD - Circuit Cancellation</a></li> ' +
-        		' <li><a href="#"><hr></a></li> ' +
-        		' <li><a id="new_workload1" class="workload" href="#">Workload: Add <b>1</b> hour for this ticket</a></li> ' +
-        		' <li><a id="new_workload2" class="workload" href="#">Workload: Add <b>2</b> hours for this ticket</a></li> ' +
-        		' <li><a id="new_workload3" class="workload" href="#">Workload: Add <b>3</b> hours for this ticket</a></li> ' +
-        		' <li><a href="#"><hr></a></li> ' +
-        		' <li><a id="mc_control" href="#">Create: MetroConnect Control Ticket</a></li> ' +
-        		' <li><a href="#"><hr></a></li> ' +
-  			'</ul> ' +
+  		'<ul> ' +
+  		' <li><a id="no_fault_found" href="#">Close: No Fault Found</a></li> ' +
+        	' <li><a id="no_response" href="#">Close: No Response from Provider</a></li> ' +
+        	' <li><a id="bandwidth_utilisation" href="#">Close: Bandwidth Over Utilised</a></li> ' +
+        	' <li>><hr></li> ' +
+        	' <li><a id="fibre_break_generic" href="#">Close: Fibre Break - Generic</a></li> ' +
+        	' <li><a id="fibre_break_stable" href="#">Close: Fibre Break - Line is stable</a></li> ' +
+        	' <li>><hr></li> ' +
+		' <li><a id="circuit_config_generic" href="#">Close: Circuit - Generic Configuration</a></li> ' +
+        	' <li><a href="#"><hr></a></li> ' +
+        	' <li><a id="power_failure_generic" href="#">Close: Power Failure - General </a></li> ' +
+        	' <li><a id="power_failure_ups" href="#">Close: Power Failure - UPS Exhausted</a></li> ' +
+        	' <li>><hr></li> ' +
+        	' <li><a id="macd_bandwidth" href="#">Close: MACD - Bandwidth Change</a></li> ' +
+        	' <li><a id="macd_relocation" href="#">Close: MACD - Circuit Relocation</a></li> ' +
+        	' <li><a id="macd_cancellation" href="#">Close: MACD - Circuit Cancellation</a></li> ' +
+        	' <li>><hr></li> ' +
+        	' <li><a id="new_workload1" class="workload" href="#">Workload: Add <b>1</b> hour for this ticket</a></li>'+
+        	' <li><a id="new_workload2" class="workload" href="#">Workload: Add <b>2</b> hours for this ticket</a></li>'+
+        	' <li><a id="new_workload3" class="workload" href="#">Workload: Add <b>3</b> hours for this ticket</a></li> ' +
+        	' <li>><hr></li> ' +
+        	' <li><a id="mc_control" href="#">Create: MetroConnect Control Ticket</a></li> ' +
+        	' <li>><hr></li> ' +
+  		'</ul> ' +
   		'</div>';    
     
     target.html(newButton + existingInner);

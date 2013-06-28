@@ -67,7 +67,7 @@ var thisURL  = document.location.href;
 var thisUserVar = userName.replace(" ","_");
 var doDebug = 0;
 
-if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_request).do/)){ 
+if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_request|change_request).do/)){ 
 
     //Only run on the location.do or urequest_do iFrame
     
@@ -82,6 +82,9 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
     }
     else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/u_request.do/)) {
      	incidentRequest = "request";
+    }
+    else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/change_request.do/)) {
+        incidentRequest = "change";
     }
     
      
@@ -134,7 +137,7 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
     
 
   	//  ---------------------------------
-    // | Close fault with No Fault Found | 
+    	// | Close fault with No Fault Found | 
 	//  ---------------------------------
     
 	$('#no_fault_found').click(function() {

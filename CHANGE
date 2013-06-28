@@ -1,7 +1,9 @@
 /*   ----------------
  * | Change History  |
  *   ----------------
- *
+ *  v1.7.0 ADD: Added ability to interface with changes (CHM)
+ *  v1.7.0 CHANGE: Collapsed lots of code into the autoClose() function, saves a lot of space
+ * 
  *  v1.6.3 FIX: Removed a links from menu HRs
  *  v1.6.2 FIX: #AC.xxx.xxx DIVs and iFrames not being correctly hidden due to race condition in ac.setWidth(); 
  *              Cleaned up in the simMenu() function

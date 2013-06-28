@@ -19,8 +19,12 @@
 /*   ----------------
  * | Change History  |
  *   ----------------
+ *  v1.7.0 ADD: Added ability to interface with changes (CHM)
+ *  v1.7.0 CHANGE: Collapsed lots of code into the autoClose() function, saves a lot of space
+ * 
+ *  v1.6.3 FIX: Removed a links from menu HRs
  *  v1.6.2 FIX: #AC.xxx.xxx DIVs and iFrames not being correctly hidden due to race condition in ac.setWidth(); 
- *		Cleaned up in the simMenu() function
+ *              Cleaned up in the simMenu() function
  *
  *  v1.6.1 CHANGE: Testing auto-updates
  *
@@ -33,10 +37,10 @@
  *  v1.4.1 ADD:  Configuration change script for Bruce
  *  v1.4.1 FORK: Forked into Local Javascript and Remote Javascript versions
  * 
- *  v1.4: ADD: 	Create control ticket automatically
- *  v1.4: ADD: 	New simMenu functionality - now changes values using ServiceNows Javascript functions, much faster!
- *  v1.4: ADD: 	Chainable waitForCSS and waitForValue functions to wait for either a field's CSS or value to i
- *		change (like the green bars on AJAX calls)
+ *  v1.4: ADD:  Create control ticket automatically
+ *  v1.4: ADD:  New simMenu functionality - now changes values using ServiceNows Javascript functions, much faster!
+ *  v1.4: ADD:  Chainable waitForCSS and waitForValue functions to wait for either a field's CSS or value to i
+ *              change (like the green bars on AJAX calls)
  *  
  *  v1.3: ADD: MAJOR rework, added support for SVRs as well as ICMs
  *  v1.3: ADD: Added Workload quick adds - will carry the Short Description into the window and add the correct hours
@@ -45,7 +49,7 @@
  *  v1.2: ADD: Automatically chooses "Close or cancel task" or "Set to closed" depending on the current status
  *  v1.2: FIX: Root cause "Configuration" regex not specific enough and matching multiple values. Tightened up.
  *  v1.2: ADD: "Close: Fibre Break - Line is stable" - for calls where we're cleaning up after a fibre break and 
- * 		shutting individual tickets down.
+ *              shutting individual tickets down.
  * 
  *  v1.1: FIX: Forced a trigger of "onchange" on the Closure and Root Cause textboxes so that values persist during save or update
  *  v1.1: ADD: "Close: No Response from Provider" and the three MACD closure processes.

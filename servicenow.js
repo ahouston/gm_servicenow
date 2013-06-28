@@ -503,7 +503,7 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
         }
         else if (incidentRequest == "change") { 
         
-			$("#sys_display\\.change_request\\.company").focus();
+	    $("#sys_display\\.change_request\\.company").focus();
             triggerKeyEventsForString("#sys_display\\.change_request\\.company","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+company_code,0,0,simMenu,company_regex);
            	
             
@@ -528,7 +528,7 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
 					
                     waitForValue("#sys_display\\.change_request\\.assignment_group","Metro Connect.KN - Support",function() {
                        
-                        triggerKeyEventsForString("#sys_display\\.change_request\\.assigned_to","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
+                        triggerKeyEventsForString("#sys_display\\.change_request\\.u_responsible_owner","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
                         $("#change_request\\.u_next_step_displayed option:contains('Mark as responded')").attr('selected', 'selected').trigger('onchange');
                         $("#change_request\\.u_accepted").val('Accepted').trigger('onchange');
                         

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       ServiceNow Autocomplete
 // @namespace  https://github.com/ahouston/gm_servicenow
-// @version    1.6.6
+// @version    1.7.0
 // @require    file://C:/GreaseMonkey/jquery.min.js
 // @require    file://C:/GreaseMonkey/jquery.simulate.js
 // @require    file://C:/GreaseMonkey/jquery-ui.js
@@ -19,8 +19,12 @@
 /*   ----------------
  * | Change History  |
  *   ----------------
+ *  v1.7.0 ADD: Added ability to interface with changes (CHM)
+ *  v1.7.0 CHANGE: Collapsed lots of code into the autoClose() function, saves a lot of space
+ * 
+ *  v1.6.3 FIX: Removed a links from menu HRs
  *  v1.6.2 FIX: #AC.xxx.xxx DIVs and iFrames not being correctly hidden due to race condition in ac.setWidth(); 
- *		Cleaned up in the simMenu() function
+ *              Cleaned up in the simMenu() function
  *
  *  v1.6.1 CHANGE: Testing auto-updates
  *
@@ -33,10 +37,10 @@
  *  v1.4.1 ADD:  Configuration change script for Bruce
  *  v1.4.1 FORK: Forked into Local Javascript and Remote Javascript versions
  * 
- *  v1.4: ADD: 	Create control ticket automatically
- *  v1.4: ADD: 	New simMenu functionality - now changes values using ServiceNows Javascript functions, much faster!
- *  v1.4: ADD: 	Chainable waitForCSS and waitForValue functions to wait for either a field's CSS or value to i
- *		change (like the green bars on AJAX calls)
+ *  v1.4: ADD:  Create control ticket automatically
+ *  v1.4: ADD:  New simMenu functionality - now changes values using ServiceNows Javascript functions, much faster!
+ *  v1.4: ADD:  Chainable waitForCSS and waitForValue functions to wait for either a field's CSS or value to i
+ *              change (like the green bars on AJAX calls)
  *  
  *  v1.3: ADD: MAJOR rework, added support for SVRs as well as ICMs
  *  v1.3: ADD: Added Workload quick adds - will carry the Short Description into the window and add the correct hours
@@ -45,7 +49,7 @@
  *  v1.2: ADD: Automatically chooses "Close or cancel task" or "Set to closed" depending on the current status
  *  v1.2: FIX: Root cause "Configuration" regex not specific enough and matching multiple values. Tightened up.
  *  v1.2: ADD: "Close: Fibre Break - Line is stable" - for calls where we're cleaning up after a fibre break and 
- * 		shutting individual tickets down.
+ *              shutting individual tickets down.
  * 
  *  v1.1: FIX: Forced a trigger of "onchange" on the Closure and Root Cause textboxes so that values persist during save or update
  *  v1.1: ADD: "Close: No Response from Provider" and the three MACD closure processes.
@@ -96,38 +100,63 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
     var target=$("td.column_head:eq(2)");
     var existingInner = target.html();
     
-    var newButton = '' +
-        '<div id="split_button_div" style="width: 160px; display: none;"> ' +
+    var newButton = '';
+    
+    
+        
+    newButton += '<div id="split_button_div" style="width: 280px; display: none;"> ' +
     	'<div> ' +
     		'<button id="rerun">Actions</button> ' +
     		'<button id="select">Select an action</button> ' +
   		'</div> ' +
-  		'<ul> ' +
-  		' <li><a id="no_fault_found" href="#">Close: No Fault Found</a></li> ' +
+  		'<ul> ';
+    
+    if (incidentRequest == 'incident' || incidentRequest == 'request') { 
+        
+  	 newButton += ' <li><a id="no_fault_found" href="#">Close: No Fault Found</a></li> ' +
         	' <li><a id="no_response" href="#">Close: No Response from Provider</a></li> ' +
         	' <li><a id="bandwidth_utilisation" href="#">Close: Bandwidth Over Utilised</a></li> ' +
-        	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:100%;"></li> ' +
+        	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:300px;"></li> ' +
         	' <li><a id="fibre_break_generic" href="#">Close: Fibre Break - Generic</a></li> ' +
         	' <li><a id="fibre_break_stable" href="#">Close: Fibre Break - Line is stable</a></li> ' +
-        	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:100%;"></li> ' +
+        	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:350px;"></li> ' +
 		' <li><a id="circuit_config_generic" href="#">Close: Circuit - Generic Configuration</a></li> ' +
-        	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:100%;"></li> ' +
+        	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:350px;"></li> ' +
         	' <li><a id="power_failure_generic" href="#">Close: Power Failure - General </a></li> ' +
         	' <li><a id="power_failure_ups" href="#">Close: Power Failure - UPS Exhausted</a></li> ' +
-        	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:100%;"></li> ' +
-        	' <li><a id="macd_bandwidth" href="#">Close: MACD - Bandwidth Change</a></li> ' +
+        	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:350px;"></li> ';
+    }
+    
+    if (incidentRequest == 'incident' || incidentRequest == 'request' || incidentRequest == 'change') {
+        
+    newButton +=  ' <li><a id="macd_bandwidth" href="#">Close: MACD - Bandwidth Change</a></li> ' +
         	' <li><a id="macd_relocation" href="#">Close: MACD - Circuit Relocation</a></li> ' +
         	' <li><a id="macd_cancellation" href="#">Close: MACD - Circuit Cancellation</a></li> ' +
-        	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:100%;"></li> ' +
-        	' <li><a id="new_workload1" class="workload" href="#">Workload: Add <b>1</b> hour for this ticket</a></li>'+
+        	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:350px;"></li> ';
+    }
+    
+    if (incidentRequest == 'incident' || incidentRequest == 'request' || incidentRequest == 'change') {
+                
+     newButton +=  ' <li><a id="new_workload1" class="workload" href="#">Workload: Add <b>1</b> hour for this ticket</a></li>'+
         	' <li><a id="new_workload2" class="workload" href="#">Workload: Add <b>2</b> hours for this ticket</a></li>'+
         	' <li><a id="new_workload3" class="workload" href="#">Workload: Add <b>3</b> hours for this ticket</a></li> ' +
-        	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:100%;"></li> ' +
-        	' <li><a id="mc_control" href="#">Create: MetroConnect Control Ticket</a></li> ' +
-        	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:100%;"></li> ' +
-  		'</ul> ' +
-  		'</div>';    
+        	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:350px;"></li> ';
+    }
     
+    if (incidentRequest == 'incident' || incidentRequest == 'request') {
+        
+     newButton +=  ' <li><a id="mc_control" href="#">Create: MetroConnect Control Ticket</a></li> ' +
+        	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:350px;"></li> ';
+	}
+    
+   	if (incidentRequest == 'change' && userName == 'Danni Manilall') {			// Only needed for Danni
+        
+     newButton +=  ' <li><a id="mc_control" href="#">Create: MetroConnect Control Ticket</a></li> ' +
+        	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:350px;"></li> ';
+   }
+    
+    newButton +=   '</ul> ' + '</div>';    
+        
     target.html(newButton + existingInner);
     setTimeout(function() { 
             $("#ui-id-1").css('position','absolute');
@@ -137,8 +166,11 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
     
 
   	//  ---------------------------------
-    	// | Close fault with No Fault Found | 
+	// | Close fault with No Fault Found | 
 	//  ---------------------------------
+   
+    
+    
     
 	$('#no_fault_found').click(function() {
  
@@ -155,31 +187,10 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
         var close_notes = "No fault was found on the MetroConnect Network";
         
         var nameRegex = new RegExp(userName,'i');
+        // function autoClose(type,tech_regex,resolution_regex,rootcause_regex,rootcause_notes,close_notes) {
         
-        if (incidentRequest == "incident") { 
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.incident\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_task_rootcause","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+rootcause_code,0,0,simMenu,rootcause_regex);
-        	$("#incident\\.u_root_cause_comments").val(rootcause_notes).trigger("onchange");
-            $("#incident\\.close_notes").val(close_notes).trigger("onchange");
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-            $("#incident\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-        	$("#incident\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-        }
-        else if (incidentRequest == "request") { 
-        
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-			$("#u_request\\.close_notes").val(close_notes).trigger("onchange");
-
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-			$("#u_request\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-			$("#u_request\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-            
-        }
-		                
+        autoClose(incidentRequest,tech_code,tech_regex,resolution_code,resolution_regex,rootcause_code,rootcause_regex,rootcause_notes,close_notes,nameRegex);
+        		                
 	});
     
     $('#no_response').click(function() {
@@ -198,29 +209,7 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
         
         var nameRegex = new RegExp(userName,'i');
         
-        if (incidentRequest == "incident") { 
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.incident\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_task_rootcause","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+rootcause_code,0,0,simMenu,rootcause_regex);
-        	$("#incident\\.u_root_cause_comments").val(rootcause_notes).trigger("onchange");
-            $("#incident\\.close_notes").val(close_notes).trigger("onchange");
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-            $("#incident\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-        	$("#incident\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-        }
-        else if (incidentRequest == "request") { 
-        
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-			$("#u_request\\.close_notes").val(close_notes).trigger("onchange");
-
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-			$("#u_request\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-			$("#u_request\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-            
-        }
+		autoClose(incidentRequest,tech_code,tech_regex,resolution_code,resolution_regex,rootcause_code,rootcause_regex,rootcause_notes,close_notes,nameRegex);
         
             
     });
@@ -241,29 +230,7 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
         
         var nameRegex = new RegExp(userName,'i');
         
-        if (incidentRequest == "incident") { 
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.incident\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_task_rootcause","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+rootcause_code,0,0,simMenu,rootcause_regex);
-        	$("#incident\\.u_root_cause_comments").val(rootcause_notes).trigger("onchange");
-            $("#incident\\.close_notes").val(close_notes).trigger("onchange");
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-            $("#incident\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-        	$("#incident\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-        }
-        else if (incidentRequest == "request") { 
-        
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-			$("#u_request\\.close_notes").val(close_notes).trigger("onchange");
-
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-			$("#u_request\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-			$("#u_request\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-            
-        }    
+        autoClose(incidentRequest,tech_code,tech_regex,resolution_code,resolution_regex,rootcause_code,rootcause_regex,rootcause_notes,close_notes,nameRegex);
             
 	});
 
@@ -284,29 +251,7 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
         
         var nameRegex = new RegExp(userName,'i');
         
-        if (incidentRequest == "incident") { 
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.incident\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_task_rootcause","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+rootcause_code,0,0,simMenu,rootcause_regex);
-        	$("#incident\\.u_root_cause_comments").val(rootcause_notes).trigger("onchange");
-            $("#incident\\.close_notes").val(close_notes).trigger("onchange");
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-            $("#incident\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-        	$("#incident\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-        }
-        else if (incidentRequest == "request") { 
-        
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-			$("#u_request\\.close_notes").val(close_notes).trigger("onchange");
-
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-			$("#u_request\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-			$("#u_request\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-            
-        }  
+        autoClose(incidentRequest,tech_code,tech_regex,resolution_code,resolution_regex,rootcause_code,rootcause_regex,rootcause_notes,close_notes,nameRegex);  
         
         
 	});
@@ -328,29 +273,7 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
         
         var nameRegex = new RegExp(userName,'i');
         
-        if (incidentRequest == "incident") { 
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.incident\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_task_rootcause","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+rootcause_code,0,0,simMenu,rootcause_regex);
-        	$("#incident\\.u_root_cause_comments").val(rootcause_notes).trigger("onchange");
-            $("#incident\\.close_notes").val(close_notes).trigger("onchange");
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-            $("#incident\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-        	$("#incident\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-        }
-        else if (incidentRequest == "request") { 
-        
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-			$("#u_request\\.close_notes").val(close_notes).trigger("onchange");
-
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-			$("#u_request\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-			$("#u_request\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-            
-        }  
+        autoClose(incidentRequest,tech_code,tech_regex,resolution_code,resolution_regex,rootcause_code,rootcause_regex,rootcause_notes,close_notes,nameRegex);  
         
         
 	});
@@ -372,29 +295,7 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
         
         var nameRegex = new RegExp(userName,'i');
         
-        if (incidentRequest == "incident") { 
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.incident\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_task_rootcause","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+rootcause_code,0,0,simMenu,rootcause_regex);
-        	$("#incident\\.u_root_cause_comments").val(rootcause_notes).trigger("onchange");
-            $("#incident\\.close_notes").val(close_notes).trigger("onchange");
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-            $("#incident\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-        	$("#incident\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-        }
-        else if (incidentRequest == "request") { 
-        
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-			$("#u_request\\.close_notes").val(close_notes).trigger("onchange");
-
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-			$("#u_request\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-			$("#u_request\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-            
-        }  
+        autoClose(incidentRequest,tech_code,tech_regex,resolution_code,resolution_regex,rootcause_code,rootcause_regex,rootcause_notes,close_notes,nameRegex);  
         
         
 	});
@@ -416,29 +317,7 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
         
         var nameRegex = new RegExp(userName,'i');
         
-        if (incidentRequest == "incident") { 
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.incident\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_task_rootcause","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+rootcause_code,0,0,simMenu,rootcause_regex);
-        	$("#incident\\.u_root_cause_comments").val(rootcause_notes).trigger("onchange");
-            $("#incident\\.close_notes").val(close_notes).trigger("onchange");
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-            $("#incident\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-        	$("#incident\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-        }
-        else if (incidentRequest == "request") { 
-        
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-			$("#u_request\\.close_notes").val(close_notes).trigger("onchange");
-
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-			$("#u_request\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-			$("#u_request\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-            
-        } 
+        autoClose(incidentRequest,tech_code,tech_regex,resolution_code,resolution_regex,rootcause_code,rootcause_regex,rootcause_notes,close_notes,nameRegex); 
         
 	});
 
@@ -459,29 +338,7 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
         
         var nameRegex = new RegExp(userName,'i');
         
-        if (incidentRequest == "incident") { 
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.incident\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_task_rootcause","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+rootcause_code,0,0,simMenu,rootcause_regex);
-        	$("#incident\\.u_root_cause_comments").val(rootcause_notes).trigger("onchange");
-            $("#incident\\.close_notes").val(close_notes).trigger("onchange");
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-            $("#incident\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-        	$("#incident\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-        }
-        else if (incidentRequest == "request") { 
-        
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-			$("#u_request\\.close_notes").val(close_notes).trigger("onchange");
-
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-			$("#u_request\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-			$("#u_request\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-            
-        }        
+        autoClose(incidentRequest,tech_code,tech_regex,resolution_code,resolution_regex,rootcause_code,rootcause_regex,rootcause_notes,close_notes,nameRegex);       
         
 	});
     
@@ -502,29 +359,7 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
         
         var nameRegex = new RegExp(userName,'i');
         
-        if (incidentRequest == "incident") { 
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.incident\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_task_rootcause","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+rootcause_code,0,0,simMenu,rootcause_regex);
-        	$("#incident\\.u_root_cause_comments").val(rootcause_notes).trigger("onchange");
-            $("#incident\\.close_notes").val(close_notes).trigger("onchange");
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-            $("#incident\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-        	$("#incident\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-        }
-        else if (incidentRequest == "request") { 
-        
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-			$("#u_request\\.close_notes").val(close_notes).trigger("onchange");
-
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-			$("#u_request\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-			$("#u_request\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-            
-        } 
+        autoClose(incidentRequest,tech_code,tech_regex,resolution_code,resolution_regex,rootcause_code,rootcause_regex,rootcause_notes,close_notes,nameRegex); 
             
             
 	});
@@ -546,29 +381,7 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
         
         var nameRegex = new RegExp(userName,'i');
         
-        if (incidentRequest == "incident") { 
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.incident\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_task_rootcause","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+rootcause_code,0,0,simMenu,rootcause_regex);
-        	$("#incident\\.u_root_cause_comments").val(rootcause_notes).trigger("onchange");
-            $("#incident\\.close_notes").val(close_notes).trigger("onchange");
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-            $("#incident\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-        	$("#incident\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-        }
-        else if (incidentRequest == "request") { 
-        
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-			$("#u_request\\.close_notes").val(close_notes).trigger("onchange");
-
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-			$("#u_request\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-			$("#u_request\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-            
-        } 		                
+        autoClose(incidentRequest,tech_code,tech_regex,resolution_code,resolution_regex,rootcause_code,rootcause_regex,rootcause_notes,close_notes,nameRegex); 		                
 	});
     
     $('#macd_cancellation').click(function() {
@@ -588,29 +401,7 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
         
         var nameRegex = new RegExp(userName,'i');
         
-        if (incidentRequest == "incident") { 
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.incident\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_task_rootcause","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+rootcause_code,0,0,simMenu,rootcause_regex);
-        	$("#incident\\.u_root_cause_comments").val(rootcause_notes).trigger("onchange");
-            $("#incident\\.close_notes").val(close_notes).trigger("onchange");
-            
-        	triggerKeyEventsForString("#sys_display\\.incident\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-            $("#incident\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-        	$("#incident\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-        }
-        else if (incidentRequest == "request") { 
-        
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
-			$("#u_request\\.close_notes").val(close_notes).trigger("onchange");
-
-			triggerKeyEventsForString("#sys_display\\.u_request\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
-			$("#u_request\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
-			$("#u_request\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
-            
-        } 
+        autoClose(incidentRequest,tech_code,tech_regex,resolution_code,resolution_regex,rootcause_code,rootcause_regex,rootcause_notes,close_notes,nameRegex); 
 		                
 	});
     
@@ -713,7 +504,46 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
             });
 
             
-        } 
+        }
+        else if (incidentRequest == "change") { 
+        
+	    $("#sys_display\\.change_request\\.company").focus();
+            triggerKeyEventsForString("#sys_display\\.change_request\\.company","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+company_code,0,0,simMenu,company_regex);
+           	
+            
+            waitForCss("#status\\.change_request\\.company","background-color","#00CC00",function() { 
+            $("#status\\.change_request\\.assignment_group").css('background-color','#FFFFFF');
+            $("#status\\.change_request\\.assignment_group").removeClass('changed');
+            
+                // Wait for the company field to go green
+                // Send the Contract now
+                
+                triggerKeyEventsForString("#sys_display\\.change_request\\.u_contract","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+contract_code,0,0,simMenu,contract_regex);
+                
+                waitForCss("#status\\.change_request\\.u_contract","background-color","#00CC00",function() {
+                 
+                    
+                    // Wait for the contract field to complete
+                	    
+                    triggerKeyEventsForString("#sys_display\\.change_request\\.u_caller","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+caller_code,0,0,simMenu,caller_regex);
+					triggerKeyEventsForString("#sys_display\\.change_request\\.assignment_group","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+group_code,0,0,simMenu,group_regex);
+                    triggerKeyEventsForString("#sys_display\\.change_request\\.u_owner_group","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+group_code,0,0,simMenu,group_regex);
+					triggerKeyEventsForString("#sys_display\\.change_request\\.u_responsible_owner_group","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+group_code,0,0,simMenu,group_regex);
+					
+                    waitForValue("#sys_display\\.change_request\\.assignment_group","Metro Connect.KN - Support",function() {
+                       
+                        triggerKeyEventsForString("#sys_display\\.change_request\\.u_responsible_owner","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
+                        $("#change_request\\.u_next_step_displayed option:contains('Mark as responded')").attr('selected', 'selected').trigger('onchange');
+                        $("#change_request\\.u_accepted").val('Accepted').trigger('onchange');
+                        
+                    });
+                    
+                });
+            
+            });
+
+            
+        }
 		  
 		
 	});
@@ -764,6 +594,59 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/task_time_wo
  *  --------- 
  */
  
+
+
+    
+
+function autoClose(incidentRequest,tech_code,tech_regex,resolution_code,resolution_regex,rootcause_code,rootcause_regex,rootcause_notes,close_notes,nameRegex,change_outcome,change_regex) {
+
+    // Autocomplete an incident, request or change
+    
+    var type = incidentRequest;
+    var change_outcome 	= typeof change_outcome !== 'undefined' ? change_outcome 	: 'Change was completed successfully';
+    var change_regex 	= typeof change_regex 	!== 'undefined' ? change_regex 		: /MEA change outcomes \> Change was completed successfully/;
+    
+   	if (type == "incident") { 
+            
+        	triggerKeyEventsForString("#sys_display\\.incident\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
+			triggerKeyEventsForString("#sys_display\\.incident\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
+        	triggerKeyEventsForString("#sys_display\\.incident\\.u_task_rootcause","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+rootcause_code,0,0,simMenu,rootcause_regex);
+        	$("#incident\\.u_root_cause_comments").val(rootcause_notes).trigger("onchange");
+            $("#incident\\.close_notes").val(close_notes).trigger("onchange");
+            
+        	triggerKeyEventsForString("#sys_display\\.incident\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
+            $("#incident\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
+        	$("#incident\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
+        }
+	else if (type == "request") { 
+        
+			triggerKeyEventsForString("#sys_display\\.u_request\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
+			triggerKeyEventsForString("#sys_display\\.u_request\\.u_task_resolution_code","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+resolution_code,0,0,simMenu,resolution_regex);
+			$("#u_request\\.close_notes").val(close_notes).trigger("onchange");
+
+			triggerKeyEventsForString("#sys_display\\.u_request\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
+			$("#u_request\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
+			$("#u_request\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
+            
+    }
+    else if (type == "change") { 
+        
+                    
+			triggerKeyEventsForString("#sys_display\\.change_request\\.u_technology","\b\b\b\b\b\b"+tech_code,0,0,simMenu,tech_regex);
+			triggerKeyEventsForString("#sys_display\\.change_request\\.u_change_outcome","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+change_outcome,0,0,simMenu,change_regex);
+            $("#change_request\\.close_notes").val(close_notes).trigger("onchange");
+			$("#change_request\\.u_review_comments").val(rootcause_notes).trigger("onchange");
+
+			triggerKeyEventsForString("#sys_display\\.change_request\\.u_resolved_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
+        	triggerKeyEventsForString("#sys_display\\.change_request\\.u_reviewed_by","\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+userName,0,0,simMenu,nameRegex);
+			$("#change_request\\.u_next_step_displayed option:contains('Close or cancel task')").attr('selected', 'selected').trigger('onchange');
+			$("#change_request\\.u_next_step_displayed option:contains('Set to closed')").attr('selected', 'selected').trigger('onchange');
+            
+	}
+        
+        
+        
+}
  
 function cleanDivs() {
 

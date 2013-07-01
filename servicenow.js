@@ -7,6 +7,8 @@
 // @require    file://C:/GreaseMonkey/jquery-ui.js
 // @require    file://C:/GreaseMonkey/splitbutton.js
 // @resource   customCSS file://C:/GreaseMonkey/jquery-ui-1.10.3.custom.css
+// @resource   bg_glass_75_e6e6e6_1x400 file://C:/GreaseMonkey/ui-bg_glass_75_e6e6e6_1x400.png
+// @resource   icons_888888_256x240.png file:///C:/Greasemonkey/ui-icons_888888_256x240.png 
 // @description ServiceNow Actions
 // @include    *didataservices.service-now.com*
 // @include    https://didataservices.service-now.com/nav.do*
@@ -91,12 +93,10 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
         incidentRequest = "change";
     }
     
-     
-        
     console.log("Starting GM Script for "+incidentRequest);
-    var newCSS = GM_getResourceText ("customCSS");
-	GM_addStyle (newCSS);
-   
+
+    loadCSS();
+
     var target=$("td.column_head:eq(2)");
     var existingInner = target.html();
     
@@ -595,6 +595,27 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/task_time_wo
  */
  
 
+
+function loadCSS {
+
+
+        var newCSS = GM_getResourceText ("customCSS");
+        GM_addStyle (newCSS);
+   
+        var img_1 = GM_getResourceURL("bg_glass_75_e6e6e6_1x400");
+        var img_2 = GM_getResourceURL("icons_888888_256x240.png");
+
+        // Override the CSS to point at the local resources instead
+
+        $("*").filter(function() {
+                return $(this).css("background-image").indexOf("bg_glass_75_e6e6e6_1x400") > -1}).css('background-image', img_1);    
+
+        $("*").filter(function() {
+                return $(this).css("background-image").indexOf("icons_888888_256x240.png") > -1}).css('background-image', img_2);    
+
+
+
+}
 
     
 

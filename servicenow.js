@@ -93,6 +93,11 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
     
     console.log("Starting GM Script for "+incidentRequest);
 
+    // Load the jquery-ui css resource in
+
+    var newCSS = GM_getResourceText ("customCSS");
+    GM_addStyle (newCSS);
+
     var target=$("td.column_head:eq(2)");
     var existingInner = target.html();
     

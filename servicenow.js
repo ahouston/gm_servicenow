@@ -107,7 +107,7 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
         
     newButton += '<div id="split_button_div" style="width: 280px; display: none;"> ' +
     	'<div> ' +
-    		'<button id="rerun">Actions</button> ' +
+    		'<button id="rerun" style="background-image:url(http://ahouston.net/js/css/smoothness/images/refresh.png)">Actions</button> ' +
     		'<button id="select">Select an action</button> ' +
   		'</div> ' +
   		'<ul> ';

@@ -145,6 +145,7 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_
         	' <li><a id="fibre_break_stable" href="#">Close: Fibre Break - Line is stable</a></li> ' +
         	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:350px;"></li> ' +
 		' <li><a id="circuit_config_generic" href="#">Close: Circuit - Generic Configuration</a></li> ' +
+		' <li><a id="hardware_failure" href="#">Close: Network: Hardware Failure</a></li> ' +
         	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:350px;"></li> ' +
         	' <li><a id="power_failure_generic" href="#">Close: Power Failure - General </a></li> ' +
         	' <li><a id="power_failure_ups" href="#">Close: Power Failure - UPS Exhausted</a></li> ' +
@@ -323,6 +324,29 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_
         
         
 	});
+
+
+    $('#hardware_failure').click(function() {
+
+        $("span:contains('Closure')").click();
+
+        var tech_code = "Cisco";
+        var tech_regex = /Cisco/ ;
+        var rootcause_code = "Hardware Failure";
+        var resolution_code = "Hardware unit replaced";
+        var rootcause_regex = /MEA root causes \> Hardware \> Hardware Failure/;
+        var resolution_regex = /MEA resolution codes \> Onsite support provided \> Hardware unit replaced/;
+
+        var close_notes = "The faulty hardware has been swapped out, and service has been restored.";
+        var rootcause_notes =  "This was caused by a hardware fault on a MetroConnect device.";
+
+
+        var nameRegex = new RegExp(userName,'i');
+
+        autoClose(incidentRequest,tech_code,tech_regex,resolution_code,resolution_regex,rootcause_code,rootcause_regex,rootcause_notes,close_notes,nameRegex);
+
+
+        });
     
     $('#power_failure_generic').click(function() {
  

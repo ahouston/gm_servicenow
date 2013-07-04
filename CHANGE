@@ -1,6 +1,11 @@
 /*   ----------------
  * | Change History  |
  *   ----------------
+ * 
+ *  v1.8.0 ADD: Refresh icon, will refresh the current main pane
+ *  v1.8.0 CHANGE: Collapsed the split_button.js code into the main GM script
+ *  v1.8.0 CHANGE: Added code to hopefully deal with frame-in-frame problem in ServiceNow 
+ *  
  *  v1.7.0 ADD: Added ability to interface with changes (CHM)
  *  v1.7.0 CHANGE: Collapsed lots of code into the autoClose() function, saves a lot of space
  * 

@@ -1,16 +1,17 @@
 // ==UserScript==
 // @name       ServiceNow Autocomplete
 // @namespace  https://github.com/ahouston/gm_servicenow
-// @version    1.7.0
+// @version    1.8.0
 // @require    file://C:/GreaseMonkey/jquery.min.js
 // @require    file://C:/GreaseMonkey/jquery.simulate.js
 // @require    file://C:/GreaseMonkey/jquery-ui.js
-// @require    file://C:/GreaseMonkey/splitbutton.js
 // @resource   customCSS file://C:/GreaseMonkey/jquery-ui-1.10.3.custom.css
 // @description ServiceNow Actions
 // @include    *didataservices.service-now.com*
-// @include    https://didataservices.service-now.com/nav.do*
+// @include    https://didataservices.service-now.com/home.do*
 // @include    https://didataservices.service-now.com/incident.do*
+// @include    https://didataservices.service-now.com/u_request.do*
+// @include    https://didataservices.service-now.com/change_request.do*
 // @updateURL  https://raw.github.com/ahouston/gm_servicenow/master/metadata
 // @downloadURL https://raw.github.com/ahouston/gm_servicenow/master/servicenow.js
 // @copyright  2013, Allan Houston
@@ -19,6 +20,11 @@
 /*   ----------------
  * | Change History  |
  *   ----------------
+ * 
+ *  v1.8.0 ADD: Refresh icon, will refresh the current main pane
+ *  v1.8.0 CHANGE: Collapsed the split_button.js code into the main GM script
+ *  v1.8.0 CHANGE: Added code to hopefully deal with frame-in-frame problem in ServiceNow 
+ *  
  *  v1.7.0 ADD: Added ability to interface with changes (CHM)
  *  v1.7.0 CHANGE: Collapsed lots of code into the autoClose() function, saves a lot of space
  * 
@@ -68,10 +74,25 @@ GM_registerMenuCommand ("Change ServiceNow Username", changeUsername);
 
 
 var thisURL  = document.location.href;
+
+// Try to detect frame-in-frame issues here
+var iframeHref = '';
+try 		{ iframeHref = parent.frames['gsft_main'].location.href; } 
+catch(err) 	{ console.warn('Error getting iframe href: ' + err.message);}
+
 var thisUserVar = userName.replace(" ","_");
 var doDebug = 0;
 
-if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_request|change_request).do/)){ 
+
+if (iframeHref.match(/^https?:\/\/didataservices.service-now.com\/home.do/)) { 
+
+	// We have a home.do in the gsft_main frame - reload the outer frame;
+	
+	alert("Detected frame-in-frame, going back!");
+	iframeHref = parent.frames['gsft_main'].history.back(-1);
+
+}
+else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_request|change_request).do/)){ 
 
     //Only run on the location.do or urequest_do iFrame
     
@@ -105,10 +126,11 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
     
     
         
-    newButton += '<div id="split_button_div" style="width: 280px; display: none;"> ' +
+   	newButton += '<div id="split_button_div" style="width: 280px; display: none;"> ' +
     	'<div> ' +
-    		'<button id="rerun" style="background-image:url(http://ahouston.net/js/css/smoothness/images/refresh.png)">Actions</button> ' +
-    		'<button id="select">Select an action</button> ' +
+        '<button id="refresh" style="background-image:url(http://ahouston.net/js/css/smoothness/images/refresh.png?moo=1213); background-repeat:no-repeat;">&nbsp; &nbsp;</button> ' +
+        '<button id="rerun" disabled style="opacity: 1;">Actions</button> ' +
+    	'<button id="select">Select an action</button> ' +
   		'</div> ' +
   		'<ul> ';
     
@@ -141,7 +163,7 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
      newButton +=  ' <li><a id="new_workload1" class="workload" href="#">Workload: Add <b>1</b> hour for this ticket</a></li>'+
         	' <li><a id="new_workload2" class="workload" href="#">Workload: Add <b>2</b> hours for this ticket</a></li>'+
         	' <li><a id="new_workload3" class="workload" href="#">Workload: Add <b>3</b> hours for this ticket</a></li> ' +
-        	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:350px;"></li> ';
+         ' <li><hr style=" color:#000000; border: 1px #000000; height:1px; width:350px;"></li> ';
     }
     
     if (incidentRequest == 'incident' || incidentRequest == 'request') {
@@ -153,7 +175,7 @@ if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_reque
    	if (incidentRequest == 'change' && userName == 'Danni Manilall') {			// Only needed for Danni
         
      newButton +=  ' <li><a id="mc_control" href="#">Create: MetroConnect Control Ticket</a></li> ' +
-        	' <li><hr style=" color:#000000; border: 1px #000000;  height:1px; width:350px;"></li> ';
+        	' <li><hr style=" color:#000000; border: 1px #000000; margin: 5px 0px 0px 0px; height:1px; width:350px;"></li> ';
    }
     
     newButton +=   '</ul> ' + '</div>';    
@@ -1011,3 +1033,46 @@ var keysim =  {
 		RIGHT: 2
 	}
 };
+
+// Do the splitbutton
+
+$(function() {
+     
+
+    $( "#rerun" )
+      .button()
+      .click(function() {
+        // alert( "Running the last action" );
+      })
+      .next()
+        .button({
+          text: false,
+          icons: {
+            primary: "ui-icon-triangle-1-s"
+          }
+        })
+        .click(function() {
+          var menu = $( this ).parent().next().show().position({
+            my: "left top",
+            at: "left bottom",
+            of: this
+          });
+          $( document ).one( "click", function() {
+            menu.hide();
+          });
+          return false;
+        })
+        .parent()
+          .buttonset()
+          .next()
+            .hide()
+            .menu();
+
+	$( "#refresh").button().click(function() { 
+
+		// Do the refresh here
+		console.warn("Refreshing frame gsft_main");
+		parent.frames['gsft_main'].location.reload();
+
+	});
+});

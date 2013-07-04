@@ -128,7 +128,7 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_
         
    	newButton += '<div id="split_button_div" style="width: 280px; display: none;"> ' +
     	'<div> ' +
-        '<button id="close_call" style="background-image:url(http://ahouston.net/js/css/smoothness/images/close.png?moo=1213); background-repeat:no-repeat;">&nbsp; &nbsp; &nbsp;</button> ' +
+        '<button id="close_call" style="background-image:url(http://ahouston.net/js/css/smoothness/images/close.png?moo=1213); background-repeat:no-repeat; background-position: left;">&nbsp; &nbsp; &nbsp;</button> ' +
         '<button id="refresh" style="background-image:url(http://ahouston.net/js/css/smoothness/images/refresh.png?moo=1213); background-repeat:no-repeat;">&nbsp; &nbsp;</button> ' +
         '<button id="rerun" disabled style="opacity: 1;">Actions</button> ' +
     	'<button id="select">Select an action</button> ' +

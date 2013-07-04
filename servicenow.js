@@ -8,7 +8,7 @@
 // @resource   customCSS file://C:/GreaseMonkey/jquery-ui-1.10.3.custom.css
 // @description ServiceNow Actions
 // @include    *didataservices.service-now.com*
-// @include    https://didataservices.service-now.com/home.do*
+// @include    https://didataservices.service-now.com/nav.do*
 // @include    https://didataservices.service-now.com/incident.do*
 // @include    https://didataservices.service-now.com/u_request.do*
 // @include    https://didataservices.service-now.com/change_request.do*
@@ -84,7 +84,7 @@ var thisUserVar = userName.replace(" ","_");
 var doDebug = 0;
 
 
-if (iframeHref.match(/^https?:\/\/didataservices.service-now.com\/home.do/)) { 
+if (iframeHref.match(/^https?:\/\/didataservices.service-now.com\/nav.do/)) { 
 
 	// We have a home.do in the gsft_main frame - reload the outer frame;
 	
@@ -128,6 +128,7 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_
         
    	newButton += '<div id="split_button_div" style="width: 280px; display: none;"> ' +
     	'<div> ' +
+        '<button id="close_call" style="background-image:url(http://ahouston.net/js/css/smoothness/images/close.png?moo=1213); background-repeat:no-repeat;">&nbsp; &nbsp; &nbsp;</button> ' +
         '<button id="refresh" style="background-image:url(http://ahouston.net/js/css/smoothness/images/refresh.png?moo=1213); background-repeat:no-repeat;">&nbsp; &nbsp;</button> ' +
         '<button id="rerun" disabled style="opacity: 1;">Actions</button> ' +
     	'<button id="select">Select an action</button> ' +
@@ -1067,6 +1068,31 @@ $(function() {
           .next()
             .hide()
             .menu();
+
+	$( "#close_call").button().click(function() {
+
+          // Do the refresh here
+	  console.warn("Closing call...");
+		
+	  var elemID = incidentRequest == 'incident' ? 'incident' 
+					    : incidentRequest == 'request' ? 'u_request' 
+					      : incidentRequest == 'change' ? 'change_request' : '';
+		
+	  $("#"+elemID+"\\.u_next_step_displayed option:contains('Close or cancel task')")
+		.attr('selected', 'selected')
+		.trigger('onchange');
+          
+	  $("#"+elemID+"\\.u_next_step_displayed option:contains('Set to closed')")
+		.attr('selected', 'selected')
+		.trigger('onchange');		
+		
+
+	  console.warn("Pressing save...");
+	  var saveObject = $("#sysverb_update_and_stay").get();
+	  var that = saveObject[0];
+	  return gsftSubmit(that);		
+
+        });
 
 	$( "#refresh").button().click(function() { 
 

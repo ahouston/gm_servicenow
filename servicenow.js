@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       ServiceNow Autocomplete
 // @namespace  https://github.com/ahouston/gm_servicenow
-// @version    1.8.0
+// @version    1.8.1
 // @require    file://C:/GreaseMonkey/jquery.min.js
 // @require    file://C:/GreaseMonkey/jquery.simulate.js
 // @require    file://C:/GreaseMonkey/jquery-ui.js
@@ -21,6 +21,9 @@
  * | Change History  |
  *   ----------------
  * 
+ *  v1.8.1 ADD: Reminders for tickets
+ *  v1.8.1 FIX: unsafeWindow for close function in Firefox
+ *
  *  v1.8.0 ADD: Refresh icon, will refresh the current main pane
  *  v1.8.0 CHANGE: Collapsed the split_button.js code into the main GM script
  *  v1.8.0 CHANGE: Added code to hopefully deal with frame-in-frame problem in ServiceNow 
@@ -173,6 +176,8 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_
 
      newButton +=  ' <li><a id="reminder_allan" reminder_name="Allan Houston" class="reminder" href="#">Reminder: Add reminder - <b>Allan Houston</b> for this ticket</a></li>'+
                    ' <li><a id="reminder_bruce" reminder_name="Bruce Jelley" class="reminder" href="#">Reminder: Add reminder - <b>Bruce Jelley</b> for this ticket</a></li>'+
+                   ' <li><a id="reminder_bruce" reminder_name="Kevin Naicker" class="reminder" href="#">Reminder: Add reminder - <b>Kevin Naicker</b> for this ticket</a></li>'+
+                   ' <li><a id="reminder_bruce" reminder_name="Deon Naidoo" class="reminder" href="#">Reminder: Add reminder - <b>Deon Naidoo</b> for this ticket</a></li>'+
          ' <li><hr style=" color:#000000; border: 1px #000000; height:1px; width:350px;"></li> ';
     }
 
@@ -689,11 +694,11 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/u_reminder.d
     $("#u_reminder\\.u_description").val(reminderDesc).trigger("onchange");
 
     triggerKeyEventsForString("#sys_display\\.u_reminder\\.u_user",
-	 reminderName,
+	 "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+reminderName,
 	 0,0,simMenu,reminderRegex);
 
     triggerKeyEventsForString("#sys_display\\.u_reminder\\.u_group",
-	group_code,
+	"\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+group_code,
 	0,0,simMenu,group_regex);
 
     GM_deleteValue(thisUserVar+"_reminder_desc");
@@ -1177,7 +1182,7 @@ $(function() {
 	  console.warn("Pressing save...");
 	  var saveObject = $("#sysverb_update_and_stay").get();
 	  var that = saveObject[0];
-	  return gsftSubmit(that);		
+	  return unsafeWindow.gsftSubmit(that);		
 
         });
 

@@ -120,6 +120,7 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_
     GM_addStyle (newCSS);
 
     var target=$("td.column_head:eq(2)");
+    console.warn(target);
     var existingInner = target.html();
     
     var newButton = '';
@@ -167,7 +168,15 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_
         	' <li><a id="new_workload3" class="workload" href="#">Workload: Add <b>3</b> hours for this ticket</a></li> ' +
          ' <li><hr style=" color:#000000; border: 1px #000000; height:1px; width:350px;"></li> ';
     }
-    
+   
+    if (incidentRequest == 'incident' || incidentRequest == 'request' || incidentRequest == 'change') {
+
+     newButton +=  ' <li><a id="reminder_allan" class="reminder" href="#">Reminder: Add reminder - <b>Allan Houston</b> for this ticket</a></li>'+
+     newButton +=  ' <li><a id="reminder_bruce" class="reminder" href="#">Reminder: Add reminder - <b>Bruce Jelley</b> for this ticket</a></li>'+
+         ' <li><hr style=" color:#000000; border: 1px #000000; height:1px; width:350px;"></li> ';
+    }
+
+ 
     if (incidentRequest == 'incident' || incidentRequest == 'request') {
         
      newButton +=  ' <li><a id="mc_control" href="#">Create: MetroConnect Control Ticket</a></li> ' +
@@ -346,7 +355,7 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_
         autoClose(incidentRequest,tech_code,tech_regex,resolution_code,resolution_regex,rootcause_code,rootcause_regex,rootcause_notes,close_notes,nameRegex);
 
 
-        });
+    });
     
     $('#power_failure_generic').click(function() {
  
@@ -614,7 +623,39 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_
             GM_setValue(thisUserVar+"_short_desc", $("input#u_request\\.short_description").val());
          	$("a[data-list_id='u_request.task_time_worked.task'] + button#sysverb_new").click();   
         }
-	});
+	else if (incidentRequest == "change") {
+            GM_setValue(thisUserVar+"_short_desc", $("input#change_request\\.short_description").val());
+                $("a[data-list_id='change_request.task_time_worked.task'] + button#sysverb_new").click();   
+        }
+    });
+
+
+    $('a.reminder').click(function() {
+
+	/* Get the reminder name from the reminder_name attr */
+
+        var reminderName = $(this).attr("reminder_name");
+
+        $("span:contains('Reminder')").click();
+
+
+        GM_setValue(thisUserVar+"_reminder_name", reminderName);
+
+        if (incidentRequest == "incident") {
+            GM_setValue(thisUserVar+"_reminder_desc", $("input#incident\\.short_description").val());
+                $("a[data-list_id='incident.u_reminder.u_task'] + button#sysverb_new").click();
+        }
+        else if (incidentRequest == "request") {
+            GM_setValue(thisUserVar+"_reminder_desc", $("input#u_request\\.short_description").val());
+                $("a[data-list_id='u_request.u_reminder.u_task'] + button#sysverb_new").click();
+        }
+	else if (incidentRequest == "change") {
+            GM_setValue(thisUserVar+"_reminder_desc", $("input#change_request\\.short_description").val());
+                $("a[data-list_id='change_request.u_reminder.u_task'] + button#sysverb_new").click();
+        }
+    });
+    
+
 }
 
 // Do Workloads
@@ -632,10 +673,32 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/task_time_wo
     },250);
     
     GM_deleteValue(thisUserVar+"_short_desc");
-	GM_deleteValue(thisUserVar+"_num_hours");
+    GM_deleteValue(thisUserVar+"_num_hours");
 }
 
+else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/u_reminder.do/)){
 
+    var reminderDesc = GM_getValue(thisUserVar+"_reminder_desc");
+    var reminderName = GM_getValue(thisUserVar+"_reminder_name",1);
+    var reminderRegex = /reminderName/;
+	
+    var group_code = "Metro Connect.KN - Support";
+    var group_regex = /Metro Connect.KN - Support/;  
+ 
+
+    $("#u_reminder\\.u_description").val(reminderDesc).trigger("onchange");
+
+    triggerKeyEventsForString("#sys_display\\.u_reminder\\.u_user",
+	 reminderName,
+	 0,0,simMenu,reminderRegex);
+
+    triggerKeyEventsForString("#sys_display\\.u_reminder\\.u_group",
+	group_code,
+	0,0,simMenu,group_regex);
+
+    GM_deleteValue(thisUserVar+"_reminder_desc");
+    GM_deleteValue(thisUserVar+"_reminder_name");
+}
 
 /*  --------- 
  *  Functions 

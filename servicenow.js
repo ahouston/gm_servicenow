@@ -171,8 +171,8 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_
    
     if (incidentRequest == 'incident' || incidentRequest == 'request' || incidentRequest == 'change') {
 
-     newButton +=  ' <li><a id="reminder_allan" reminder_name='Allan Houston' class="reminder" href="#">Reminder: Add reminder - <b>Allan Houston</b> for this ticket</a></li>'+
-     newButton +=  ' <li><a id="reminder_bruce" reminder_name='Bruce Jelley' class="reminder" href="#">Reminder: Add reminder - <b>Bruce Jelley</b> for this ticket</a></li>'+
+     newButton +=  ' <li><a id="reminder_allan" reminder_name="Allan Houston" class="reminder" href="#">Reminder: Add reminder - <b>Allan Houston</b> for this ticket</a></li>'+
+     newButton +=  ' <li><a id="reminder_bruce" reminder_name="Bruce Jelley" class="reminder" href="#">Reminder: Add reminder - <b>Bruce Jelley</b> for this ticket</a></li>'+
          ' <li><hr style=" color:#000000; border: 1px #000000; height:1px; width:350px;"></li> ';
     }
 

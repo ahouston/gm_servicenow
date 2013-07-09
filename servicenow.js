@@ -12,7 +12,7 @@
 // @include    https://didataservices.service-now.com/change_request.do*
 // @include    https://didataservices.service-now.com/u_workload.do*
 // @include    https://didataservices.service-now.com/u_reminder.do*
-// @updateURL  https://raw.github.com/ahouston/gm_servicenow/master/metadata
+// @updateURL  https://raw.github.com/ahouston/gm_servicenow/master/metadata.js
 // @downloadURL https://raw.github.com/ahouston/gm_servicenow/master/servicenow.js
 // @copyright  2013, Allan Houston
 // ==/UserScript==

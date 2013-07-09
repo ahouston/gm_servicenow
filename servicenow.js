@@ -12,7 +12,7 @@
 // @include    https://didataservices.service-now.com/change_request.do*
 // @include    https://didataservices.service-now.com/u_workload.do*
 // @include    https://didataservices.service-now.com/u_reminder.do*
-// @updateURL  https://raw.github.com/ahouston/gm_servicenow/master/metadata.js
+// @updateURL  https://raw.github.com/ahouston/gm_servicenow/master/metadata
 // @downloadURL https://raw.github.com/ahouston/gm_servicenow/master/servicenow.js
 // @copyright  2013, Allan Houston
 // ==/UserScript==
@@ -72,9 +72,17 @@
 var userName = GM_getValue ("userName", "");
     userName = fetchOrPrompt (userName,   "Your Name in ServiceNow", "userName");
 
+var jsLogging = GM_getValue("jsLogging",true);
+
 GM_registerMenuCommand ("Change ServiceNow Username", changeUsername);
+GM_registerMenuCommand ("Toggle ServiceNow Javascript Logging", toggleLogging);
 
-
+if (jsLogging == true) {
+    
+    	console.warn("Hijacking jslog()...");
+        var oldJsLog = unsafeWindow.jslog;
+        unsafeWindow.jslog = function() { }; // Do nothing
+}
 
 var thisURL  = document.location.href;
 
@@ -123,7 +131,6 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_
     GM_addStyle (newCSS);
 
     var target=$("td.column_head:eq(2)");
-    console.warn(target);
     var existingInner = target.html();
     
     var newButton = '';
@@ -640,7 +647,8 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/(incident|u_
 	/* Get the reminder name from the reminder_name attr */
 
         var reminderName = $(this).attr("reminder_name");
-
+        
+        
         $("span:contains('Reminder')").click();
 
 
@@ -686,7 +694,8 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/u_reminder.d
     var reminderDesc = GM_getValue(thisUserVar+"_reminder_desc");
     var reminderName = GM_getValue(thisUserVar+"_reminder_name",1);
     var reminderRegex = /reminderName/;
-	
+	if (reminderName == 1) { return; }					// It needs to be set to a name.
+    
     var group_code = "Metro Connect.KN - Support";
     var group_regex = /Metro Connect.KN - Support/;  
  
@@ -1093,6 +1102,23 @@ function promptAndChangeStoredValue (targVar, userPrompt, setValVarName) {
     GM_setValue (setValVarName, targVar );
 }
 
+function toggleLogging() {
+ 
+    if (jsLogging == true) { 
+    	
+        alert("Setting ServiceNow logging: OFF\n\nThis will remove the hijack of jslog();");
+        GM_setValue("jsLogging",false);
+        unsafeWindow.jslog = oldJsLog;
+    }
+    else {
+        alert("Setting ServiceNow logging: ON\n\nThis hijack the function jslog() to improve speed.");
+        GM_setValue("jsLogging",true);
+        var oldJsLog = unsafeWindow.jslog;
+        unsafeWindow.jslog = function() { }; // Do nothing
+    }    
+}
+
+
 var keysim =  {
 
 	keyCode: {
@@ -1194,3 +1220,4 @@ $(function() {
 
 	});
 });
+

@@ -1110,13 +1110,12 @@ function toggleLogging() {
     	
         alert("Setting ServiceNow logging: OFF\n\nThis will remove the hijack of jslog();");
         GM_setValue("jsLogging",false);
-        jslog = oldJsLog;
+        
     }
     else {
         alert("Setting ServiceNow logging: ON\n\nThis hijack the function jslog() to improve speed.");
         GM_setValue("jsLogging",true);
-        var oldJsLog = unsafeWindow.jslog;
-        unsafeWindow.jslog = function() { }; // Do nothing
+        
     }    
 }
 

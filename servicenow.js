@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       ServiceNow Autocomplete
 // @namespace  https://github.com/ahouston/gm_servicenow
-// @version    1.8.1
+// @version    1.8.2
 // @require    file://C:/GreaseMonkey/jquery.min.js
 // @require    file://C:/GreaseMonkey/jquery.simulate.js
 // @require    file://C:/GreaseMonkey/jquery-ui.js
@@ -20,6 +20,10 @@
 /*   ----------------
  * | Change History  |
  *   ----------------
+ *  v1.8.2 FIX: Reminders not working properly, fixed regex complilation to correct this
+ *  v1.8.2 ADD: Open the calendar widget by default on reminders
+ *  v1.8.2 ADD: Added jslog() hijack to skim some time off the loading
+ *  v1.8.2 CHANGE: Moved all images and js to HTTPS
  * 
  *  v1.8.1 ADD: Reminders for tickets
  *  v1.8.1 FIX: unsafeWindow for close function in Firefox

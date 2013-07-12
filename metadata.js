@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       ServiceNow Autocomplete
 // @namespace  https://github.com/ahouston/gm_servicenow
-// @version    1.8.1
+// @version    1.8.2
 // @require    file://C:/GreaseMonkey/jquery.min.js
 // @require    file://C:/GreaseMonkey/jquery.simulate.js
 // @require    file://C:/GreaseMonkey/jquery-ui.js

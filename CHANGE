@@ -1,7 +1,11 @@
 /*   ----------------
  * | Change History  |
  *   ----------------
- *
+ *  v1.8.2 FIX: Reminders not working properly, fixed regex complilation to correct this
+ *  v1.8.2 ADD: Open the calendar widget by default on reminders
+ *  v1.8.2 ADD: Added jslog() hijack to skim some time off the loading
+ *  v1.8.2 CHANGE: Moved all images and js to HTTPS
+ * 
  *  v1.8.1 ADD: Reminders for tickets
  *  v1.8.1 FIX: unsafeWindow for close function in Firefox
  *

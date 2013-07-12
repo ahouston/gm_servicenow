@@ -693,7 +693,7 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/u_reminder.d
 
     var reminderDesc = GM_getValue(thisUserVar+"_reminder_desc");
     var reminderName = GM_getValue(thisUserVar+"_reminder_name",1);
-    var reminderRegex = /reminderName/;
+    var reminderRegex = new RegExp(reminderName,'i');
 	if (reminderName == 1) { return; }					// It needs to be set to a name.
     
     var group_code = "Metro Connect.KN - Support";
@@ -710,6 +710,8 @@ else if (thisURL.match(/^https?:\/\/didataservices.service-now.com\/u_reminder.d
 	"\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"+group_code,
 	0,0,simMenu,group_regex);
 
+    setTimeout(function () { $("img[title='Choose date...']").trigger("click");   },1500);
+        
     GM_deleteValue(thisUserVar+"_reminder_desc");
     GM_deleteValue(thisUserVar+"_reminder_name");
 }
@@ -1108,13 +1110,12 @@ function toggleLogging() {
     	
         alert("Setting ServiceNow logging: OFF\n\nThis will remove the hijack of jslog();");
         GM_setValue("jsLogging",false);
-        unsafeWindow.jslog = oldJsLog;
+        
     }
     else {
         alert("Setting ServiceNow logging: ON\n\nThis hijack the function jslog() to improve speed.");
         GM_setValue("jsLogging",true);
-        var oldJsLog = unsafeWindow.jslog;
-        unsafeWindow.jslog = function() { }; // Do nothing
+        
     }    
 }
 
@@ -1220,4 +1221,3 @@ $(function() {
 
 	});
 });
-
